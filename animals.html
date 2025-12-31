@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Safari - Kids Learning Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --primary-color: #FF6B9D;
+            --secondary-color: #FFA502;
+            --accent-color: #26A69A;
+        }
+
+        body {
+            background: linear-gradient(135deg, #FFE4E1 0%, #E0F7FA 100%);
+        }
+
+        #game-title {
+            color: #26A69A;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        #animal-display {
+            width: 200px;
+            height: 200px;
+            font-size: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px auto;
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFE4E1 100%);
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(38, 166, 154, 0.2);
+            animation: bounce 0.6s ease;
+        }
+
+        .animal-info {
+            font-size: 1.8em;
+            color: #26A69A;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .quiz-button {
+            background: linear-gradient(135deg, #FF6B9D 0%, #FFA502 100%);
+            color: white;
+            border: none;
+            padding: 20px;
+            margin: 10px;
+            width: 140px;
+            height: 140px;
+            font-size: 80px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 107, 157, 0.3);
+            display: inline-block;
+        }
+
+        .quiz-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(255, 107, 157, 0.5);
+        }
+
+        .quiz-button.correct {
+            animation: pulse 0.6s ease;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        }
+
+        .quiz-button.incorrect {
+            animation: shake 0.5s ease;
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%);
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .mode-btn {
+            padding: 12px 24px;
+            font-size: 1.1em;
+            background: #FFA502;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn.active {
+            background: #26A69A;
+            transform: scale(1.05);
+        }
+
+        .progress-bar {
+            width: 300px;
+            height: 30px;
+            background: #E0E0E0;
+            border-radius: 15px;
+            margin: 20px auto;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #progressFill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF6B9D 0%, #FFA502 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #26A69A;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .completion-message {
+            font-size: 1.5em;
+            color: #26A69A;
+            text-align: center;
+            margin: 20px;
+            animation: float-up 0.8s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" onclick="goBack()">← Back</button>        
+        <div class="mode-toggle">
+            <button class="mode-btn active" onclick="switchMode('learn')">Learn Mode</button>
+            <button class="mode-btn" onclick="switchMode('quiz')">Quiz Mode</button>
+            <button class="audio-toggle" onclick="toggleAudio()">🔊 Sound ON</button>
+        </div>
+
+        <div class="progress-bar">
+            <div id="progressFill"></div>
+        </div>
+        <div class="progress-text">Learned: <span id="progress">0</span> / 10</div>
+
+        <!-- Learn Mode -->
+        <div id="learn-mode" style="display: block;">
+            <div id="animal-display"></div>
+            <div class="animal-info">
+                <div id="animal-name"></div>
+                <div id="animal-description" style="font-size: 0.8em; color: #999; margin-top: 10px;"></div>
+            </div>
+            <div style="text-align: center;">
+                <button class="action-btn" onclick="speakCurrent()">🔊 Hear it!</button>
+                <button class="action-btn" onclick="nextItem()">Next →</button>
+            </div>
+        </div>
+
+        <!-- Quiz Mode -->
+        <div id="quiz-mode" style="display: none;">
+            <h2 style="text-align: center; color: #26A69A;">Listen and pick the right animal!</h2>
+            <div style="text-align: center; margin: 20px 0;">
+                <button class="action-btn" onclick="playQuizAudio()">🔊 Play Sound</button>
+            </div>
+            <div id="quiz-instructions" style="text-align: center; color: #FFA502; font-weight: bold; margin: 10px;">
+                Pick the animal you hear!
+            </div>
+            <div id="quiz-options" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;"></div>
+            <div id="feedback" style="text-align: center; font-size: 1.2em; margin-top: 20px; min-height: 30px;"></div>
+        </div>
+
+        <!-- Completion Message -->
+        <div id="completion-message" style="display: none; text-align: center;">
+            <div class="completion-message">🎉 Awesome! You learned all animals! 🎉</div>
+            <div style="font-size: 3em; text-align: center; letter-spacing: 5px;">🦁🐘🐵🦒🐯🐻🐧🐬🦋🐰</div>
+        </div>
+    </div>
+
+    <script>
+        const animalsData = {
+            Lion: { description: 'King of the jungle with a big mane', emoji: '🦁' },
+            Elephant: { description: 'Huge animal with a long trunk', emoji: '🐘' },
+            Monkey: { description: 'Playful animal that loves bananas', emoji: '🐵' },
+            Giraffe: { description: 'Tallest animal with a long neck', emoji: '🦒' },
+            Tiger: { description: 'Orange striped big cat', emoji: '🐯' },
+            Bear: { description: 'Big and strong furry animal', emoji: '🐻' },
+            Penguin: { description: 'Black and white bird that lives in ice', emoji: '🐧' },
+            Dolphin: { description: 'Smart marine animal that jumps high', emoji: '🐬' },
+            Butterfly: { description: 'Colorful insect with beautiful wings', emoji: '🦋' },
+            Rabbit: { description: 'Cute hopping animal with long ears', emoji: '🐰' }
+        };
+
+        let currentIndex = 0;
+        let soundEnabled = true;
+        let currentMode = 'learn';
+        const animals = Object.keys(animalsData);
+        let learnedCount = 0;
+        let quizAnswered = false;
+
+        function speak(text) {
+            if (!soundEnabled) return;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.8;
+            utterance.pitch = 1.2;
+            speechSynthesis.speak(utterance);
+        }
+
+        function playSound(frequency = 800, duration = 200) {
+            if (!soundEnabled) return;
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration / 1000);
+        }
+
+        function speakCurrent() {
+            const animal = animals[currentIndex];
+            speak(animal);
+            playSound(700, 150);
+        }
+
+        function playQuizAudio() {
+            const animal = animals[currentIndex];
+            speak(animal);
+            playSound(800, 200);
+        }
+
+        function updateDisplay() {
+            const animal = animals[currentIndex];
+            const data = animalsData[animal];
+            document.getElementById('animal-display').textContent = data.emoji;
+            document.getElementById('animal-name').textContent = animal;
+            document.getElementById('animal-description').textContent = data.description;
+            updateProgress();
+
+            if (currentMode === 'learn') {
+                speak(animal);
+                playSound(600, 150);
+            }
+        }
+
+        function updateProgress() {
+            const percent = ((currentIndex + 1) / animals.length) * 100;
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progress').textContent = Math.min(currentIndex + 1, learnedCount + 1);
+        }
+
+        function nextItem() {
+            if (currentIndex < animals.length - 1) {
+                learnedCount = Math.max(learnedCount, currentIndex + 1);
+                currentIndex++;
+                updateDisplay();
+            } else {
+                learnedCount = animals.length;
+                updateProgress();
+                document.getElementById('learn-mode').style.display = 'none';
+                document.getElementById('completion-message').style.display = 'block';
+                playSound(1000, 200);
+                playSound(1200, 200);
+            }
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (mode === 'learn') {
+                document.getElementById('learn-mode').style.display = 'block';
+                document.getElementById('quiz-mode').style.display = 'none';
+                document.getElementById('completion-message').style.display = 'none';
+                currentIndex = 0;
+                updateDisplay();
+            } else {
+                document.getElementById('learn-mode').style.display = 'none';
+                document.getElementById('quiz-mode').style.display = 'block';
+                document.getElementById('completion-message').style.display = 'none';
+                startQuiz();
+            }
+        }
+
+        function startQuiz() {
+            quizAnswered = false;
+            currentIndex = Math.floor(Math.random() * animals.length);
+            const animal = animals[currentIndex];
+            const data = animalsData[animal];
+
+            document.getElementById('quiz-instructions').textContent = `Pick the animal you hear!`;
+            document.getElementById('feedback').textContent = '';
+
+            let options = [animal];
+            while (options.length < 4) {
+                const random = animals[Math.floor(Math.random() * animals.length)];
+                if (!options.includes(random)) {
+                    options.push(random);
+                }
+            }
+            options.sort(() => Math.random() - 0.5);
+
+            const quizOptions = document.getElementById('quiz-options');
+            quizOptions.innerHTML = '';
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-button';
+                btn.textContent = animalsData[opt].emoji;
+                btn.onclick = () => checkAnswer(opt, animal, btn);
+                quizOptions.appendChild(btn);
+            });
+
+            setTimeout(() => playQuizAudio(), 500);
+        }
+
+        function checkAnswer(selected, correct, btn) {
+            if (quizAnswered) return;
+            quizAnswered = true;
+
+            if (selected === correct) {
+                btn.classList.add('correct');
+                document.getElementById('feedback').textContent = '✅ Correct! Well done!';
+                document.getElementById('feedback').style.color = '#4CAF50';
+                playSound(1000, 200);
+                playSound(1200, 150);
+                learnedCount = Math.max(learnedCount, currentIndex + 1);
+                setTimeout(() => startQuiz(), 1500);
+            } else {
+                btn.classList.add('incorrect');
+                document.getElementById('feedback').textContent = `❌ Not quite. It's a ${correct}!`;
+                document.getElementById('feedback').style.color = '#FF6B6B';
+                playSound(400, 200);
+                setTimeout(() => startQuiz(), 2000);
+            }
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            const btn = document.querySelector('.audio-toggle');
+            btn.textContent = soundEnabled ? '🔊 Sound ON' : '🔇 Sound OFF';
+        }
+
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize
+        updateDisplay();
+    </script>
+</body>
+</html>

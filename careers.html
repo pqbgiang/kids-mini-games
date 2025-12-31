@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Careers Learning Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Careers game specific styles */
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #FCE4EC;
+            background-image: linear-gradient(0deg, #FCE4EC 0%, #F1F8E9 100%);
+            font-family: 'Arial Rounded MT Bold', 'Helvetica', sans-serif;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        #game-card {
+            box-shadow: 0 20px 0 #E91E63;
+        }
+
+        #game-card:active {
+            box-shadow: 0 10px 0 #E91E63;
+        }
+
+        #career-emoji {
+            font-size: 120px;
+            margin: 15px 0;
+            animation: bounce 0.5s ease;
+        }
+
+        #career-name {
+            font-size: 48px;
+            margin: 20px 0;
+            color: #333;
+            font-weight: bold;
+        }
+
+        #progress-fill {
+            background: linear-gradient(90deg, #E91E63, #C2185B);
+        }
+
+        #completion-message h2 {
+            color: #E91E63;
+        }
+
+        .color-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .career-btn {
+            width: 140px;
+            height: 140px;
+            border-radius: 20px;
+            border: 5px solid #ddd;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            background: white;
+        }
+
+        .career-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .career-btn.correct {
+            border-color: #32CD32;
+            box-shadow: 0 0 20px rgba(50, 205, 50, 0.6);
+            animation: pulse 0.5s;
+        }
+
+        .career-btn.incorrect {
+            border-color: #FF6B6B;
+            animation: shake 0.5s;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay"></div>
+
+    <button class="back-btn" onclick="goBack()">← Back</button>
+
+    <div class="controls">
+        <button id="learn-btn" class="active" onclick="switchMode('learn')">Learn Mode</button>
+        <button id="quiz-btn" onclick="switchMode('quiz')">Quiz Mode</button>
+        <button onclick="toggleAudio()">🔊 Sound: ON</button>
+    </div>
+
+    <div id="learn-mode">
+        <div id="game-card" onclick="nextCareer()">
+            <div id="career-emoji">👨‍⚕️</div>
+            <div id="career-name">Doctor</div>
+            <p class="instruction">Tap to learn the next career!</p>
+            <div id="progress-bar">
+                <div id="progress-fill" style="width: 10%"></div>
+            </div>
+            <div id="learned-count">Learned: 1 / 10</div>
+        </div>
+    </div>
+
+    <div id="quiz-mode" style="display: none;">
+        <div id="game-card">
+            <p class="instruction" style="font-size: 16px; margin-bottom: 10px;">Listen and pick the right career!</p>
+            <p class="instruction" style="font-size: 20px; margin: 15px 0;">Pick the career you hear:</p>
+            <div style="text-align: center; margin: 15px 0;">
+                <button style="padding: 12px 20px; font-size: 16px; cursor: pointer;" onclick="playQuizCareer()">🔊 Play Career Sound</button>
+            </div>
+            <div class="color-options" id="career-options"></div>
+            <div id="quiz-feedback" style="font-size: 20px; margin-top: 15px; min-height: 30px;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Careers data
+        const careersData = {
+            Doctor: { emoji: '👨‍⚕️' },
+            Teacher: { emoji: '👨‍🏫' },
+            Police: { emoji: '👮' },
+            Firefighter: { emoji: '👨‍🚒' },
+            Chef: { emoji: '👨‍🍳' },
+            Farmer: { emoji: '👨‍🌾' },
+            Engineer: { emoji: '👷' },
+            Astronaut: { emoji: '👨‍🚀' },
+            Painter: { emoji: '👨‍🎨' },
+            Athlete: { emoji: '⛹️' }
+        };
+
+        const careerNames = Object.keys(careersData);
+        let currentIndex = 0;
+        let learnedCareers = new Set(['Doctor']);
+        let soundEnabled = true;
+        let currentMode = 'learn';
+
+        const careerEmoji = document.getElementById('career-emoji');
+        const careerName = document.getElementById('career-name');
+        const progressFill = document.getElementById('progress-fill');
+        const learnedCount = document.getElementById('learned-count');
+
+        const synth = window.speechSynthesis;
+
+        function speak(text) {
+            if (!soundEnabled) return;
+            synth.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.8;
+            utterance.pitch = 1.1;
+            synth.speak(utterance);
+        }
+
+        function playSound(frequency = 800, duration = 100) {
+            if (!soundEnabled) return;
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration / 1000);
+        }
+
+        function updateDisplay() {
+            const career = careerNames[currentIndex];
+            const data = careersData[career];
+            
+            careerEmoji.innerText = data.emoji;
+            careerName.innerText = career;
+            
+            careerEmoji.style.animation = 'none';
+            setTimeout(() => {
+                careerEmoji.style.animation = 'bounce 0.5s ease';
+            }, 10);
+            
+            setTimeout(() => {
+                speak(career);
+            }, 100);
+            
+            playSound(800, 100);
+        }
+
+        function nextCareer() {
+            if (currentIndex < careerNames.length - 1) {
+                currentIndex++;
+                learnedCareers.add(careerNames[currentIndex]);
+                updateDisplay();
+                updateProgress();
+            } else {
+                showCompletion();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentIndex + 1) / careerNames.length) * 100;
+            progressFill.style.width = progress + '%';
+            learnedCount.innerText = `Learned: ${currentIndex + 1} / 10`;
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            event.target.innerText = soundEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+        }
+
+        function showCompletion() {
+            const overlay = document.getElementById('overlay');
+            const message = document.getElementById('completion-message') || createCompletionMessage();
+            
+            overlay.style.display = 'block';
+            message.style.display = 'block';
+            
+            playSound(1000, 300);
+            setTimeout(() => playSound(1200, 300), 200);
+            
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => createCelebration(), i * 100);
+            }
+        }
+
+        function createCelebration() {
+            const emojis = ['🎉', '⭐', '🌟', '✨', '🎊'];
+            const celebration = document.createElement('div');
+            celebration.className = 'celebration';
+            celebration.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            celebration.style.left = (Math.random() * 80 + 10) + '%';
+            document.body.appendChild(celebration);
+            
+            setTimeout(() => celebration.remove(), 2000);
+        }
+
+        function createCompletionMessage() {
+            const message = document.createElement('div');
+            message.id = 'completion-message';
+            message.innerHTML = `
+                <h2>🎉 All Careers Learned! 🎉</h2>
+                <p>You learned all 10 careers! 🌟</p>
+                <p>What will you be when you grow up?</p>
+                <button onclick="resetGame()" style="margin-top: 20px; padding: 15px 30px; font-size: 20px; background: linear-gradient(135deg, #E91E63, #C2185B); color: white; border: none; border-radius: 15px; cursor: pointer;">Learn Again!</button>
+            `;
+            document.body.appendChild(message);
+            return message;
+        }
+
+        function resetGame() {
+            currentIndex = 0;
+            learnedCareers.clear();
+            learnedCareers.add('Doctor');
+            updateDisplay();
+            updateProgress();
+            const message = document.getElementById('completion-message');
+            const overlay = document.getElementById('overlay');
+            if (message) message.style.display = 'none';
+            overlay.style.display = 'none';
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('learn-btn').classList.toggle('active', mode === 'learn');
+            document.getElementById('quiz-btn').classList.toggle('active', mode === 'quiz');
+            
+            document.getElementById('learn-mode').style.display = mode === 'learn' ? 'block' : 'none';
+            document.getElementById('quiz-mode').style.display = mode === 'quiz' ? 'block' : 'none';
+            
+            if (mode === 'quiz') {
+                startQuiz();
+            }
+        }
+
+        function startQuiz() {
+            const quizIndex = Math.floor(Math.random() * careerNames.length);
+            const correctCareer = careerNames[quizIndex];
+            
+            document.getElementById('quiz-feedback').innerText = '';
+            
+            let options = [correctCareer];
+            while (options.length < 4) {
+                const randomCareer = careerNames[Math.floor(Math.random() * careerNames.length)];
+                if (!options.includes(randomCareer)) {
+                    options.push(randomCareer);
+                }
+            }
+            
+            options = options.sort(() => Math.random() - 0.5);
+            
+            const careerOptions = document.getElementById('career-options');
+            careerOptions.innerHTML = '';
+            
+            options.forEach(career => {
+                const btn = document.createElement('div');
+                btn.className = 'career-btn';
+                btn.innerText = careersData[career].emoji;
+                btn.onclick = () => checkQuizAnswer(career, correctCareer, btn);
+                careerOptions.appendChild(btn);
+            });
+            
+            setTimeout(() => speak(correctCareer), 300);
+        }
+
+        function playQuizCareer() {
+            const careerNames_all = Object.keys(careersData);
+            const randomIndex = Math.floor(Math.random() * careerNames_all.length);
+            speak(careerNames_all[randomIndex]);
+        }
+
+        function checkQuizAnswer(selected, correct, button) {
+            const feedback = document.getElementById('quiz-feedback');
+            const allButtons = document.querySelectorAll('.career-btn');
+            
+            allButtons.forEach(btn => btn.onclick = null);
+            
+            if (selected === correct) {
+                button.classList.add('correct');
+                feedback.innerText = '✅ Correct! Great job!';
+                feedback.style.color = '#32CD32';
+                playSound(1000, 200);
+                
+                setTimeout(() => startQuiz(), 2000);
+            } else {
+                button.classList.add('incorrect');
+                feedback.innerText = `❌ Not quite! It's ${correct}`;
+                feedback.style.color = '#FF6B6B';
+                playSound(400, 200);
+                
+                setTimeout(() => startQuiz(), 2500);
+            }
+        }
+
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        updateDisplay();
+        updateProgress();
+    </script>
+</body>
+</html>

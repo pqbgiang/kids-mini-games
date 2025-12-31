@@ -1,0 +1,609 @@
+/* ============================================
+   Kids Learning Games - Shared Stylesheet
+   ============================================ */
+
+* {
+    box-sizing: border-box;
+}
+
+/* ============================================
+   Global Animations
+   ============================================ */
+
+@keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+@keyframes float-up {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    100% { transform: translate(-50%, -200px) scale(1.5); opacity: 0; }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+@keyframes drift {
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+        transform: translate(30px, -30px) rotate(10deg);
+    }
+    50% {
+        transform: translate(0, -60px) rotate(-5deg);
+    }
+    75% {
+        transform: translate(-30px, -30px) rotate(8deg);
+    }
+}
+
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes bounce-title {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+/* ============================================
+   Buttons - All Types
+   ============================================ */
+
+button {
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 20px;
+    border: none;
+    background: white;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #ddd;
+    font-weight: bold;
+    transition: all 0.1s;
+    font-family: 'Arial Rounded MT Bold', 'Helvetica', sans-serif;
+}
+
+button:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #ddd;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+button.active {
+    background: #FFB6C1;
+    color: white;
+}
+
+/* Back Button */
+.back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 20px;
+    border: none;
+    background: white;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #ddd;
+    font-weight: bold;
+    z-index: 100;
+    transition: all 0.1s;
+}
+
+.back-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #ddd;
+}
+
+/* Control Buttons */
+.controls {
+    position: absolute;
+    top: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
+
+/* Play Button */
+.play-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 18px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 15px rgba(102, 126, 234, 0.4);
+}
+
+.play-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+}
+
+.play-btn:active {
+    transform: translateY(-1px);
+}
+
+/* Quiz Buttons */
+.quiz-btn {
+    padding: 15px;
+    font-size: 24px;
+    border-radius: 15px;
+    border: 3px solid #ddd;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.quiz-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.quiz-btn.correct {
+    background: #90EE90;
+    border-color: #32CD32;
+    animation: pulse 0.5s;
+}
+
+.quiz-btn.incorrect {
+    background: #FFB6C1;
+    border-color: #FF6B6B;
+    animation: shake 0.5s;
+}
+
+/* Color Button (for color quiz) */
+.color-btn {
+    width: 120px;
+    height: 120px;
+    border-radius: 20px;
+    border: 5px solid #ddd;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.color-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.color-btn.correct {
+    border-color: #32CD32;
+    box-shadow: 0 0 20px rgba(50, 205, 50, 0.6);
+    animation: pulse 0.5s;
+}
+
+.color-btn.incorrect {
+    border-color: #FF6B6B;
+    animation: shake 0.5s;
+}
+
+/* ============================================
+   Cards & Containers
+   ============================================ */
+
+#game-card {
+    background: white;
+    padding: 40px 50px;
+    border-radius: 50px;
+    box-shadow: 0 20px 0 #6dbcc3;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    user-select: none;
+    min-width: 350px;
+}
+
+#game-card:active {
+    transform: translateY(10px);
+    box-shadow: 0 10px 0 #6dbcc3;
+}
+
+.game-card {
+    background: white;
+    border-radius: 40px;
+    padding: 40px 30px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.game-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: left 0.3s ease;
+}
+
+.game-card:hover {
+    transform: translateY(-20px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+}
+
+.game-card:hover::before {
+    left: 100%;
+}
+
+.game-card:active {
+    transform: scale(0.95);
+}
+
+/* ============================================
+   Display Elements
+   ============================================ */
+
+#display-text {
+    font-size: 120px;
+    margin: 0 0 10px 0;
+    color: #FF6B6B;
+    line-height: 1;
+}
+
+#emoji-display {
+    font-size: 80px;
+    margin: 10px 0;
+    animation: bounce 0.5s ease;
+}
+
+#word-display {
+    font-size: 48px;
+    margin: 10px 0;
+    color: #4ECDC4;
+    font-weight: bold;
+}
+
+#color-display {
+    width: 150px;
+    height: 150px;
+    border-radius: 30px;
+    margin: 20px auto;
+    animation: pulse-color 0.5s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes pulse-color {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+#color-name {
+    font-size: 48px;
+    margin: 20px 0;
+    color: #333;
+    font-weight: bold;
+}
+
+/* ============================================
+   Text Elements
+   ============================================ */
+
+.instruction {
+    margin-top: 15px;
+    font-size: 18px;
+    color: #555;
+}
+
+.instruction-quiz {
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: #555;
+}
+
+.game-title {
+    font-size: 36px;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.game-description {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.game-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    animation: float 3s ease-in-out infinite;
+}
+
+.game-card:nth-child(1) .game-icon {
+    animation-delay: 0s;
+}
+
+.game-card:nth-child(2) .game-icon {
+    animation-delay: 0.5s;
+}
+
+.game-card:nth-child(3) .game-icon {
+    animation-delay: 1s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+}
+
+/* ============================================
+   Progress & Feedback
+   ============================================ */
+
+#progress-bar {
+    margin-top: 20px;
+    background: #ddd;
+    border-radius: 10px;
+    height: 12px;
+    overflow: hidden;
+}
+
+#progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FF6B6B, #4ECDC4);
+    transition: width 0.3s ease;
+}
+
+#learned-count {
+    font-size: 14px;
+    color: #888;
+    margin-top: 8px;
+}
+
+.celebration {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 60px;
+    pointer-events: none;
+    animation: float-up 2s ease-out;
+}
+
+#quiz-feedback {
+    font-size: 20px;
+    margin-top: 15px;
+    min-height: 30px;
+}
+
+/* ============================================
+   Modals & Overlays
+   ============================================ */
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 999;
+}
+
+#completion-message {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 40px;
+    border-radius: 30px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+#completion-message h2 {
+    font-size: 36px;
+    color: #4ECDC4;
+    margin: 0 0 20px 0;
+}
+
+#completion-message p {
+    font-size: 24px;
+    margin: 10px 0;
+}
+
+.coming-soon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* ============================================
+   Decorative Elements
+   ============================================ */
+
+.decorative-emoji {
+    position: fixed;
+    font-size: 40px;
+    opacity: 0.3;
+    pointer-events: none;
+    animation: drift 20s linear infinite;
+}
+
+.emoji-1 {
+    top: 10%;
+    left: 5%;
+    animation-delay: 0s;
+}
+
+.emoji-2 {
+    top: 70%;
+    right: 10%;
+    animation-delay: 5s;
+    font-size: 50px;
+}
+
+.emoji-3 {
+    bottom: 20%;
+    left: 15%;
+    animation-delay: 10s;
+    font-size: 45px;
+}
+
+.emoji-4 {
+    top: 30%;
+    right: 5%;
+    animation-delay: 15s;
+    font-size: 55px;
+}
+
+/* ============================================
+   Quiz Layouts
+   ============================================ */
+
+.quiz-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.color-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin: 30px 0;
+}
+
+.quiz-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ============================================
+   Mode Displays
+   ============================================ */
+
+#learn-mode {
+    /* Shown by default */
+}
+
+#quiz-mode {
+    display: none;
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 40px;
+    }
+
+    .subtitle {
+        font-size: 18px;
+        margin-bottom: 30px;
+    }
+
+    .games-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .game-icon {
+        font-size: 60px;
+    }
+
+    .game-title {
+        font-size: 28px;
+    }
+
+    #display-text {
+        font-size: 80px;
+    }
+
+    #color-display {
+        width: 120px;
+        height: 120px;
+    }
+
+    .color-btn {
+        width: 100px;
+        height: 100px;
+    }
+
+    .quiz-options {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .color-options {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    #game-card {
+        padding: 30px 20px;
+        min-width: 300px;
+    }
+
+    button {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    .play-btn {
+        padding: 12px 30px;
+        font-size: 16px;
+    }
+
+    #display-text {
+        font-size: 60px;
+    }
+
+    #emoji-display {
+        font-size: 60px;
+    }
+
+    #word-display {
+        font-size: 36px;
+    }
+
+    #color-name {
+        font-size: 36px;
+    }
+
+    .instruction {
+        font-size: 14px;
+    }
+}

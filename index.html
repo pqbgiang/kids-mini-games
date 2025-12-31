@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Learning Games</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Main page specific styles */
+        body {
+            font-family: 'Arial Rounded MT Bold', 'Helvetica', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 1200px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 60px;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            animation: bounce-title 1s ease;
+        }
+
+        .subtitle {
+            font-size: 24px;
+            color: #ffffff;
+            margin-bottom: 50px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+            padding: 20px;
+            max-width: 1400px;
+        }
+
+        .footer {
+            color: white;
+            font-size: 14px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="decorative-emoji emoji-1">🎉</div>
+    <div class="decorative-emoji emoji-2">⭐</div>
+    <div class="decorative-emoji emoji-3">✨</div>
+    <div class="decorative-emoji emoji-4">🌟</div>
+
+    <div class="container">
+        <h1>🎮 Kids Learning Games</h1>
+        <p class="subtitle">Choose a game and start learning today!</p>
+
+        <div class="games-grid">
+            <!-- Alphabet Game -->
+            <div class="game-card">
+                <div class="game-icon">🔤</div>
+                <h2 class="game-title">Alphabet Adventure</h2>
+                <p class="game-description">Learn all 26 letters with fun words, emojis, and sounds. Master the alphabet through interactive games!</p>
+                <button class="play-btn" onclick="navigateTo('alphabet.html')">Play Game →</button>
+            </div>
+
+            <!-- Numbers Game -->
+            <div class="game-card">
+                <div class="game-icon">🔢</div>
+                <h2 class="game-title">Number Quest</h2>
+                <p class="game-description">Count from 0 to 9 with cool emojis and audio. Learn numbers the fun and interactive way!</p>
+                <button class="play-btn" onclick="navigateTo('numbers.html')">Play Game →</button>
+            </div>
+
+            <!-- Color Quest Game -->
+            <div class="game-card">
+                <div class="game-icon">🎨</div>
+                <h2 class="game-title">Color Quest</h2>
+                <p class="game-description">Discover 10 beautiful colors with visual examples. Learn and identify colors through fun interactive activities!</p>
+                <button class="play-btn" onclick="navigateTo('colors.html')">Play Game →</button>
+            </div>
+
+            <!-- Shapes Game -->
+            <div class="game-card">
+                <div class="game-icon">🔷</div>
+                <h2 class="game-title">Shape Fun</h2>
+                <p class="game-description">Learn 10 exciting shapes! From circles to stars, discover all shapes through interactive learning.</p>
+                <button class="play-btn" onclick="navigateTo('shapes.html')">Play Game →</button>
+            </div>
+
+            <!-- Objects Game -->
+            <div class="game-card">
+                <div class="game-icon">📚</div>
+                <h2 class="game-title">Object Discovery</h2>
+                <p class="game-description">Explore everyday objects like books, cups, and cars. Learn common things kids use daily!</p>
+                <button class="play-btn" onclick="navigateTo('objects.html')">Play Game →</button>
+            </div>
+
+            <!-- Transportation Game -->
+            <div class="game-card">
+                <div class="game-icon">🚗</div>
+                <h2 class="game-title">Transportation Quest</h2>
+                <p class="game-description">Explore exciting vehicles! From cars to rockets, discover all kinds of transportation.</p>
+                <button class="play-btn" onclick="navigateTo('transportation.html')">Play Game →</button>
+            </div>
+
+            <!-- Careers Game -->
+            <div class="game-card">
+                <div class="game-icon">👨‍⚕️</div>
+                <h2 class="game-title">Career Explorer</h2>
+                <p class="game-description">Discover amazing careers! Doctors, teachers, astronauts, and more. What will you be?</p>
+                <button class="play-btn" onclick="navigateTo('careers.html')">Play Game →</button>
+            </div>
+
+            <!-- Animals Game -->
+            <div class="game-card">
+                <div class="game-icon">🦁</div>
+                <h2 class="game-title">Animal Safari</h2>
+                <p class="game-description">Explore the wild! Lions, elephants, monkeys, and more. Discover amazing animals from around the world!</p>
+                <button class="play-btn" onclick="navigateTo('animals.html')">Play Game →</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>✨ Made for Kids with ❤️ | Educational Games for Fun Learning ✨</p>
+        </div>
+    </div>
+
+    <script>
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+    </script>
+
+</body>
+</html>

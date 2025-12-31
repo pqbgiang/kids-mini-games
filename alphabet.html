@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Alphabet Learning Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Alphabet game specific styles */
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #FFDEE9;
+            background-image: linear-gradient(0deg, #FFDEE9 0%, #B5FFFC 100%);
+            font-family: 'Arial Rounded MT Bold', 'Helvetica', sans-serif;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        #game-card {
+            box-shadow: 0 20px 0 #6dbcc3;
+        }
+
+        #game-card:active {
+            box-shadow: 0 10px 0 #6dbcc3;
+        }
+
+        #progress-fill {
+            background: linear-gradient(90deg, #FF6B6B, #4ECDC4);
+        }
+
+        #completion-message h2 {
+            color: #4ECDC4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay"></div>
+
+    <button class="back-btn" onclick="goBack()">← Back</button>
+
+    <div class="controls">
+        <button id="learn-btn" class="active" onclick="switchMode('learn')">Learn Mode</button>
+        <button id="quiz-btn" onclick="switchMode('quiz')">Quiz Mode</button>
+        <button onclick="toggleAudio()">🔊 Sound: ON</button>
+    </div>
+
+    <div id="learn-mode">
+        <div id="game-card" onclick="nextItem()">
+            <h1 id="display-text">A</h1>
+            <div id="emoji-display">🍎</div>
+            <div id="word-display">Apple</div>
+            <p class="instruction">Tap to learn the next letter!</p>
+            <div id="progress-bar">
+                <div id="progress-fill" style="width: 3.8%"></div>
+            </div>
+            <div id="learned-count">Learned: 1 / 26</div>
+        </div>
+    </div>
+
+    <div id="quiz-mode" style="display: none;">
+        <div id="game-card">
+            <p class="instruction" style="font-size: 16px; margin-bottom: 10px;">Listen and pick the right letter!</p>
+            <h1 id="quiz-word" style="font-size: 48px; color: #4ECDC4; margin: 20px 0;">Tap to hear the word</h1>
+            <div style="text-align: center; margin: 20px 0;">
+                <button style="padding: 12px 20px; font-size: 16px; cursor: pointer;" onclick="playQuizWord()">🔊 Play Word Sound</button>
+            </div>
+            <div class="quiz-options" id="quiz-options"></div>
+            <div id="quiz-feedback" style="font-size: 20px; margin-top: 15px; min-height: 30px;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Comprehensive alphabet data with words and emojis
+        const alphabetData = {
+            A: { word: 'Apple', emoji: '🍎' },
+            B: { word: 'Ball', emoji: '⚽' },
+            C: { word: 'Cat', emoji: '🐱' },
+            D: { word: 'Dog', emoji: '🐕' },
+            E: { word: 'Egg', emoji: '🥚' },
+            F: { word: 'Fish', emoji: '🐠' },
+            G: { word: 'Grape', emoji: '🍇' },
+            H: { word: 'Hat', emoji: '🎩' },
+            I: { word: 'Ice Cream', emoji: '🍦' },
+            J: { word: 'Jellyfish', emoji: '🪼' },
+            K: { word: 'Kite', emoji: '🪁' },
+            L: { word: 'Lion', emoji: '🦁' },
+            M: { word: 'Monkey', emoji: '🐵' },
+            N: { word: 'Nest', emoji: '🪶' },
+            O: { word: 'Orange', emoji: '🍊' },
+            P: { word: 'Pig', emoji: '🐷' },
+            Q: { word: 'Queen', emoji: '👑' },
+            R: { word: 'Rainbow', emoji: '🌈' },
+            S: { word: 'Sun', emoji: '☀️' },
+            T: { word: 'Tiger', emoji: '🐯' },
+            U: { word: 'Umbrella', emoji: '☂️' },
+            V: { word: 'Violin', emoji: '🎻' },
+            W: { word: 'Whale', emoji: '🐋' },
+            X: { word: 'Xylophone', emoji: '🎵' },
+            Y: { word: 'Yo-yo', emoji: '📿' },
+            Z: { word: 'Zebra', emoji: '🦓' }
+        };
+
+        const letters = Object.keys(alphabetData);
+        let currentIndex = 0;
+        let learnedLetters = new Set(['A']);
+        let soundEnabled = true;
+        let currentMode = 'learn';
+
+        const display = document.getElementById('display-text');
+        const emojiDisplay = document.getElementById('emoji-display');
+        const wordDisplay = document.getElementById('word-display');
+        const progressFill = document.getElementById('progress-fill');
+        const learnedCount = document.getElementById('learned-count');
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5'];
+
+        // Initialize speech synthesis
+        const synth = window.speechSynthesis;
+
+        function speak(text) {
+            if (!soundEnabled) return;
+            
+            synth.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.8;
+            utterance.pitch = 1.2;
+            synth.speak(utterance);
+        }
+
+        function playSound(frequency = 800, duration = 100) {
+            if (!soundEnabled) return;
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration / 1000);
+        }
+
+        function updateDisplay() {
+            const letter = letters[currentIndex];
+            const data = alphabetData[letter];
+            
+            display.innerText = letter;
+            emojiDisplay.innerText = data.emoji;
+            wordDisplay.innerText = data.word;
+            
+            display.style.color = colors[Math.floor(Math.random() * colors.length)];
+            display.style.transform = "scale(1.2)";
+            setTimeout(() => display.style.transform = "scale(1)", 100);
+            
+            // Speak the letter and word
+            setTimeout(() => {
+                speak(letter);
+                setTimeout(() => speak(data.word), 300);
+            }, 100);
+            
+            // Play a satisfying beep
+            playSound(800, 100);
+        }
+
+        function nextItem() {
+            if (currentIndex < letters.length - 1) {
+                currentIndex++;
+                learnedLetters.add(letters[currentIndex]);
+                updateDisplay();
+                updateProgress();
+            } else {
+                showCompletion();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentIndex + 1) / letters.length) * 100;
+            progressFill.style.width = progress + '%';
+            learnedCount.innerText = `Learned: ${currentIndex + 1} / 26`;
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            event.target.innerText = soundEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+        }
+
+        function showCompletion() {
+            const overlay = document.getElementById('overlay');
+            const message = document.getElementById('completion-message') || createCompletionMessage();
+            
+            overlay.style.display = 'block';
+            message.style.display = 'block';
+            
+            playSound(1000, 300);
+            setTimeout(() => playSound(1200, 300), 200);
+            
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => createCelebration(), i * 100);
+            }
+        }
+
+        function createCelebration() {
+            const emojis = ['🎉', '⭐', '🌟', '✨', '🎊'];
+            const celebration = document.createElement('div');
+            celebration.className = 'celebration';
+            celebration.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            celebration.style.left = (Math.random() * 80 + 10) + '%';
+            document.body.appendChild(celebration);
+            
+            setTimeout(() => celebration.remove(), 2000);
+        }
+
+        function createCompletionMessage() {
+            const message = document.createElement('div');
+            message.id = 'completion-message';
+            message.innerHTML = `
+                <h2>🎉 Alphabet Complete! 🎉</h2>
+                <p>You learned all 26 letters! 🌟</p>
+                <p>Great job, super learner!</p>
+                <button onclick="resetGame()" style="margin-top: 20px; padding: 15px 30px; font-size: 20px;">Learn Again!</button>
+            `;
+            document.body.appendChild(message);
+            return message;
+        }
+
+        function resetGame() {
+            currentIndex = 0;
+            learnedLetters.clear();
+            learnedLetters.add('A');
+            updateDisplay();
+            updateProgress();
+            const message = document.getElementById('completion-message');
+            const overlay = document.getElementById('overlay');
+            if (message) message.style.display = 'none';
+            overlay.style.display = 'none';
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('learn-btn').classList.toggle('active', mode === 'learn');
+            document.getElementById('quiz-btn').classList.toggle('active', mode === 'quiz');
+            
+            document.getElementById('learn-mode').style.display = mode === 'learn' ? 'block' : 'none';
+            document.getElementById('quiz-mode').style.display = mode === 'quiz' ? 'block' : 'none';
+            
+            if (mode === 'quiz') {
+                startQuiz();
+            }
+        }
+
+        function startQuiz() {
+            const quizIndex = Math.floor(Math.random() * letters.length);
+            const correctLetter = letters[quizIndex];
+            const data = alphabetData[correctLetter];
+            
+            document.getElementById('quiz-word').innerText = data.word;
+            document.getElementById('quiz-word').style.fontSize = '40px';
+            document.getElementById('quiz-feedback').innerText = '';
+            
+            // Get 3 wrong options
+            let options = [correctLetter];
+            while (options.length < 4) {
+                const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+                if (!options.includes(randomLetter)) {
+                    options.push(randomLetter);
+                }
+            }
+            
+            // Shuffle options
+            options = options.sort(() => Math.random() - 0.5);
+            
+            const quizOptions = document.getElementById('quiz-options');
+            quizOptions.innerHTML = '';
+            
+            options.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-btn';
+                btn.innerText = letter;
+                btn.onclick = () => checkQuizAnswer(letter, correctLetter, btn);
+                quizOptions.appendChild(btn);
+            });
+            
+            // Play the word sound
+            setTimeout(() => speak(data.word), 300);
+        }
+
+        function playQuizWord() {
+            const word = document.getElementById('quiz-word').innerText;
+            speak(word);
+        }
+
+        function checkQuizAnswer(selected, correct, button) {
+            const feedback = document.getElementById('quiz-feedback');
+            const allButtons = document.querySelectorAll('.quiz-btn');
+            
+            allButtons.forEach(btn => btn.disabled = true);
+            
+            if (selected === correct) {
+                button.classList.add('correct');
+                feedback.innerText = '✅ Correct! Great job!';
+                feedback.style.color = '#32CD32';
+                playSound(1000, 200);
+                
+                setTimeout(() => startQuiz(), 2000);
+            } else {
+                button.classList.add('incorrect');
+                feedback.innerText = `❌ Not quite! It's ${correct}`;
+                feedback.style.color = '#FF6B6B';
+                playSound(400, 200);
+                
+                setTimeout(() => startQuiz(), 2500);
+            }
+        }
+
+        // Initialize the game
+        updateDisplay();
+        updateProgress();
+
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Color Learning Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #F0F4FF;
+            background-image: linear-gradient(0deg, #F0F4FF 0%, #FFE6F0 100%);
+            font-family: 'Arial Rounded MT Bold', 'Helvetica', sans-serif;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        .controls {
+            position: absolute;
+            top: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 20px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #ddd;
+            font-weight: bold;
+            transition: all 0.1s;
+        }
+
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #ddd;
+        }
+
+        button.active {
+            background: #FFB6C1;
+            color: white;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 20px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #ddd;
+            font-weight: bold;
+        }
+
+        .back-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #ddd;
+        }
+
+        #game-card {
+            background: white;
+            padding: 40px 50px;
+            border-radius: 50px;
+            box-shadow: 0 20px 0 #7B68EE;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+            user-select: none;
+            min-width: 350px;
+        }
+
+        #game-card:active {
+            transform: translateY(10px);
+            box-shadow: 0 10px 0 #7B68EE;
+        }
+
+        #color-display {
+            width: 150px;
+            height: 150px;
+            border-radius: 30px;
+            margin: 20px auto;
+            animation: pulse-color 0.5s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes pulse-color {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        #color-name {
+            font-size: 48px;
+            margin: 20px 0;
+            color: #333;
+            font-weight: bold;
+        }
+
+        #color-emoji {
+            font-size: 80px;
+            margin: 15px 0;
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .instruction {
+            margin-top: 15px;
+            font-size: 18px;
+            color: #555;
+        }
+
+        #progress-bar {
+            margin-top: 20px;
+            background: #ddd;
+            border-radius: 10px;
+            height: 12px;
+            overflow: hidden;
+        }
+
+        #progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7B68EE, #FF69B4);
+            transition: width 0.3s ease;
+        }
+
+        #learned-count {
+            font-size: 14px;
+            color: #888;
+            margin-top: 8px;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            pointer-events: none;
+            animation: float-up 2s ease-out;
+        }
+
+        @keyframes float-up {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            100% { transform: translate(-50%, -200px) scale(1.5); opacity: 0; }
+        }
+
+        #quiz-mode {
+            display: none;
+        }
+
+        .quiz-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .instruction-quiz {
+            font-size: 16px;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .color-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .color-btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 20px;
+            border: 5px solid #ddd;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .color-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .color-btn.correct {
+            border-color: #32CD32;
+            box-shadow: 0 0 20px rgba(50, 205, 50, 0.6);
+            animation: pulse 0.5s;
+        }
+
+        .color-btn.incorrect {
+            border-color: #FF6B6B;
+            animation: shake 0.5s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        #quiz-feedback {
+            font-size: 20px;
+            margin-top: 20px;
+            min-height: 30px;
+        }
+
+        #completion-message {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+
+        #completion-message h2 {
+            font-size: 36px;
+            color: #7B68EE;
+            margin: 0 0 20px 0;
+        }
+
+        #completion-message p {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay"></div>
+
+    <button class="back-btn" onclick="goBack()">← Back</button>
+
+    <div class="controls" style="left: 50%; transform: translateX(-50%);">
+        <button id="learn-btn" class="active" onclick="switchMode('learn')">Learn Mode</button>
+        <button id="quiz-btn" onclick="switchMode('quiz')">Quiz Mode</button>
+        <button onclick="toggleAudio()">🔊 Sound: ON</button>
+    </div>
+
+    <div id="learn-mode">
+        <div id="game-card" onclick="nextColor()">
+            <div id="color-display" style="background-color: #FF0000;"></div>
+            <div id="color-name">Red</div>
+            <div id="color-emoji">🍎</div>
+            <p class="instruction">Tap to learn the next color!</p>
+            <div id="progress-bar">
+                <div id="progress-fill" style="width: 10%"></div>
+            </div>
+            <div id="learned-count">Learned: 1 / 10</div>
+        </div>
+    </div>
+
+    <div id="quiz-mode" style="display: none;">
+        <div id="game-card">
+            <p class="instruction-quiz">Listen and pick the right color!</p>
+            <p class="instruction" style="font-size: 20px; margin: 15px 0;">Pick the color you hear:</p>
+            <div style="text-align: center; margin: 15px 0;">
+                <button style="padding: 12px 20px; font-size: 16px; cursor: pointer;" onclick="playQuizColor()">🔊 Play Color Sound</button>
+            </div>
+            <div class="color-options" id="color-options"></div>
+            <div id="quiz-feedback" style="font-size: 20px; margin-top: 15px; min-height: 30px;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Colors data with emojis
+        const colorsData = {
+            Red: { hex: '#FF0000', emoji: '🍎' },
+            Blue: { hex: '#0066FF', emoji: '🌊' },
+            Yellow: { hex: '#FFD700', emoji: '☀️' },
+            Green: { hex: '#00B050', emoji: '🌳' },
+            Purple: { hex: '#8B00FF', emoji: '👾' },
+            Orange: { hex: '#FF8C00', emoji: '🍊' },
+            Pink: { hex: '#FF69B4', emoji: '🌸' },
+            Brown: { hex: '#8B4513', emoji: '🧸' },
+            Black: { hex: '#000000', emoji: '🐈' },
+            White: { hex: '#F5F5F5', emoji: '☁️' }
+        };
+
+        const colorNames = Object.keys(colorsData);
+        let currentIndex = 0;
+        let learnedColors = new Set(['Red']);
+        let soundEnabled = true;
+        let currentMode = 'learn';
+
+        const colorDisplay = document.getElementById('color-display');
+        const colorName = document.getElementById('color-name');
+        const colorEmoji = document.getElementById('color-emoji');
+        const progressFill = document.getElementById('progress-fill');
+        const learnedCount = document.getElementById('learned-count');
+
+        // Initialize speech synthesis
+        const synth = window.speechSynthesis;
+
+        function speak(text) {
+            if (!soundEnabled) return;
+            
+            synth.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.8;
+            utterance.pitch = 1.1;
+            synth.speak(utterance);
+        }
+
+        function playSound(frequency = 800, duration = 100) {
+            if (!soundEnabled) return;
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration / 1000);
+        }
+
+        function updateDisplay() {
+            const color = colorNames[currentIndex];
+            const data = colorsData[color];
+            
+            colorDisplay.style.backgroundColor = data.hex;
+            colorName.innerText = color;
+            colorEmoji.innerText = data.emoji;
+            
+            colorDisplay.style.animation = 'none';
+            setTimeout(() => {
+                colorDisplay.style.animation = 'pulse-color 0.5s ease';
+            }, 10);
+            
+            // Speak the color
+            setTimeout(() => {
+                speak(color);
+            }, 100);
+            
+            // Play a satisfying beep
+            playSound(800, 100);
+        }
+
+        function nextColor() {
+            if (currentIndex < colorNames.length - 1) {
+                currentIndex++;
+                learnedColors.add(colorNames[currentIndex]);
+                updateDisplay();
+                updateProgress();
+            } else {
+                showCompletion();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentIndex + 1) / colorNames.length) * 100;
+            progressFill.style.width = progress + '%';
+            learnedCount.innerText = `Learned: ${currentIndex + 1} / 10`;
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            event.target.innerText = soundEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+        }
+
+        function showCompletion() {
+            const overlay = document.getElementById('overlay');
+            const message = document.getElementById('completion-message') || createCompletionMessage();
+            
+            overlay.style.display = 'block';
+            message.style.display = 'block';
+            
+            playSound(1000, 300);
+            setTimeout(() => playSound(1200, 300), 200);
+            
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => createCelebration(), i * 100);
+            }
+        }
+
+        function createCelebration() {
+            const emojis = ['🎉', '⭐', '🌟', '✨', '🎊'];
+            const celebration = document.createElement('div');
+            celebration.className = 'celebration';
+            celebration.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            celebration.style.left = (Math.random() * 80 + 10) + '%';
+            document.body.appendChild(celebration);
+            
+            setTimeout(() => celebration.remove(), 2000);
+        }
+
+        function createCompletionMessage() {
+            const message = document.createElement('div');
+            message.id = 'completion-message';
+            message.innerHTML = `
+                <h2>🎉 All Colors Learned! 🎉</h2>
+                <p>You learned all 10 colors! 🌈</p>
+                <p>Great job, super learner!</p>
+                <button onclick="resetGame()" style="margin-top: 20px; padding: 15px 30px; font-size: 20px; background: linear-gradient(135deg, #7B68EE, #FF69B4); color: white; border: none; border-radius: 15px; cursor: pointer;">Learn Again!</button>
+            `;
+            document.body.appendChild(message);
+            return message;
+        }
+
+        function resetGame() {
+            currentIndex = 0;
+            learnedColors.clear();
+            learnedColors.add('Red');
+            updateDisplay();
+            updateProgress();
+            const message = document.getElementById('completion-message');
+            const overlay = document.getElementById('overlay');
+            if (message) message.style.display = 'none';
+            overlay.style.display = 'none';
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('learn-btn').classList.toggle('active', mode === 'learn');
+            document.getElementById('quiz-btn').classList.toggle('active', mode === 'quiz');
+            
+            document.getElementById('learn-mode').style.display = mode === 'learn' ? 'block' : 'none';
+            document.getElementById('quiz-mode').style.display = mode === 'quiz' ? 'block' : 'none';
+            
+            if (mode === 'quiz') {
+                startQuiz();
+            }
+        }
+
+        function startQuiz() {
+            const quizIndex = Math.floor(Math.random() * colorNames.length);
+            const correctColor = colorNames[quizIndex];
+            
+            document.getElementById('quiz-feedback').innerText = '';
+            
+            // Get 3 wrong options
+            let options = [correctColor];
+            while (options.length < 4) {
+                const randomColor = colorNames[Math.floor(Math.random() * colorNames.length)];
+                if (!options.includes(randomColor)) {
+                    options.push(randomColor);
+                }
+            }
+            
+            // Shuffle options
+            options = options.sort(() => Math.random() - 0.5);
+            
+            const colorOptions = document.getElementById('color-options');
+            colorOptions.innerHTML = '';
+            
+            options.forEach(color => {
+                const btn = document.createElement('div');
+                btn.className = 'color-btn';
+                btn.style.backgroundColor = colorsData[color].hex;
+                if (color === 'Black') {
+                    btn.style.border = '5px solid white';
+                }
+                btn.onclick = () => checkQuizAnswer(color, correctColor, btn);
+                colorOptions.appendChild(btn);
+            });
+            
+            // Play the color sound
+            setTimeout(() => speak(correctColor), 300);
+        }
+
+        function playQuizColor() {
+            // Find which color was played last
+            const feedback = document.getElementById('quiz-feedback').innerText;
+            if (feedback.includes('Correct') || feedback.includes('Not quite')) {
+                // Get the displayed instruction to determine color
+                const colorNames_all = Object.keys(colorsData);
+                const randomIndex = Math.floor(Math.random() * colorNames_all.length);
+                speak(colorNames_all[randomIndex]);
+            }
+        }
+
+        function checkQuizAnswer(selected, correct, button) {
+            const feedback = document.getElementById('quiz-feedback');
+            const allButtons = document.querySelectorAll('.color-btn');
+            
+            allButtons.forEach(btn => btn.onclick = null);
+            
+            if (selected === correct) {
+                button.classList.add('correct');
+                feedback.innerText = '✅ Correct! Great job!';
+                feedback.style.color = '#32CD32';
+                playSound(1000, 200);
+                
+                setTimeout(() => startQuiz(), 2000);
+            } else {
+                button.classList.add('incorrect');
+                feedback.innerText = `❌ Not quite! It's ${correct}`;
+                feedback.style.color = '#FF6B6B';
+                playSound(400, 200);
+                
+                setTimeout(() => startQuiz(), 2500);
+            }
+        }
+
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize the game
+        updateDisplay();
+        updateProgress();
+    </script>
+</body>
+</html>
