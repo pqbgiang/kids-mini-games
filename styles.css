@@ -94,8 +94,8 @@ button.active {
     position: absolute;
     top: 20px;
     left: 20px;
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: 15px 25px;
+    font-size: 32px;
     border-radius: 20px;
     border: none;
     background: white;
@@ -114,10 +114,12 @@ button.active {
 /* Control Buttons */
 .controls {
     position: absolute;
-    top: 20px;
+    top: 80px;
     display: flex;
     gap: 10px;
     z-index: 100;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 /* Play Button */
