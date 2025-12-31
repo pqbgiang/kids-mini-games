@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Quiz - Kids Learning Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Super Quiz game specific styles */
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            font-family: 'Arial Rounded MT Bold', 'Helvetica', sans-serif;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        #game-card {
+            box-shadow: 0 20px 0 rgba(102, 126, 234, 0.5);
+        }
+
+        #game-card:active {
+            box-shadow: 0 10px 0 rgba(102, 126, 234, 0.5);
+        }
+
+        #progress-fill {
+            background: linear-gradient(90deg, #667eea, #f093fb);
+        }
+
+        #completion-message h2 {
+            color: #667eea;
+        }
+
+        .category-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        #quiz-word {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay"></div>
+
+    <button class="back-btn" onclick="goBack()">🏠</button>
+
+    <div class="controls">
+        <button onclick="toggleAudio()">🔊 Sound: ON</button>
+        <button onclick="restartQuiz()" style="padding: 12px 20px; background: #764ba2; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">Restart</button>
+    </div>
+
+    <div id="quiz-mode">
+        <div id="game-card">
+            <p class="instruction" style="font-size: 14px; margin-bottom: 5px;">Super Quiz Challenge!</p>
+            <div class="category-badge" id="category-badge">📚 All Topics</div>
+            <h1 id="quiz-word" style="font-size: 48px; margin: 20px 0;">Tap to hear the question</h1>
+            <div style="text-align: center; margin: 20px 0;">
+                <button style="padding: 12px 20px; font-size: 16px; cursor: pointer;" onclick="playQuizWord()">🔊 Play Question</button>
+            </div>
+            <div class="quiz-options" id="quiz-options"></div>
+            <div id="quiz-feedback" style="font-size: 20px; margin-top: 15px; min-height: 30px;"></div>
+            <div id="progress-bar">
+                <div id="progress-fill" style="width: 0%"></div>
+            </div>
+            <div id="learned-count" style="margin-top: 15px; font-weight: bold; color: #667eea;">Score: 0</div>
+        </div>
+    </div>
+
+    <div id="completion-message" style="display: none; text-align: center;">
+        <h2 style="font-size: 2em;">🏆 SUPER QUIZ MASTER! 🏆</h2>
+        <div style="font-size: 1.5em; margin: 15px 0;">You got all 10 questions correct!</div>
+        <div style="font-size: 2.5em; letter-spacing: 5px; margin: 20px 0;">🎊 ✨ 🌟 ⭐ 🎉</div>
+        <button onclick="location.reload()" style="margin-top: 20px; padding: 15px 30px; font-size: 18px; background: #667eea; color: white; border: none; border-radius: 10px; cursor: pointer;">Play Again</button>
+    </div>
+
+    <script>
+        // Combined data from all topics
+        const allQuestionsData = [
+            // Alphabet (5 random letters)
+            { category: '🔤 Alphabet', type: 'letter', data: { A: '🍎', B: '⚽', C: '🐱', D: '🐕', E: '🥚' } },
+            // Numbers (5 random numbers)
+            { category: '🔢 Numbers', type: 'number', data: { 0: '0️⃣', 1: '1️⃣', 2: '2️⃣', 3: '3️⃣', 4: '4️⃣' } },
+            // Colors (3 random colors)
+            { category: '🎨 Colors', type: 'color', data: { Red: '🔴', Blue: '🔵', Yellow: '🟡', Green: '🟢', Purple: '🟣', Orange: '🟠', Pink: '🌸', Brown: '🟤', Black: '⚫', White: '⚪' } },
+            // Shapes (3 random shapes)
+            { category: '🔷 Shapes', type: 'shape', names: ['Circle', 'Square', 'Triangle', 'Star', 'Heart'] },
+            // Objects (2 random objects)
+            { category: '📚 Objects', type: 'object', emojis: { '📚': 'Book', '🖊️': 'Pen', '🍎': 'Apple', '☕': 'Cup', '👟': 'Shoe' } },
+            // Animals (2 random animals)
+            { category: '🦁 Animals', type: 'animal', names: ['Lion', 'Elephant', 'Monkey', 'Tiger', 'Bear'] },
+            // Transportation (2 random vehicles)
+            { category: '🚗 Transportation', type: 'vehicle', emojis: { '🚗': 'Car', '🚌': 'Bus', '🚂': 'Train', '✈️': 'Airplane', '🚲': 'Bike' } },
+            // Careers (2 random careers)
+            { category: '👨‍⚕️ Careers', type: 'career', names: ['Doctor', 'Teacher', 'Chef', 'Police Officer', 'Engineer'] }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let soundEnabled = true;
+        let askedQuestions = new Set();
+
+        function speak(text) {
+            if (!soundEnabled) return;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.8;
+            utterance.pitch = 1.1;
+            speechSynthesis.speak(utterance);
+        }
+
+        function playSound(frequency = 800, duration = 200) {
+            if (!soundEnabled) return;
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration / 1000);
+        }
+
+        function getRandomQuestion() {
+            let question, categoryData, correctAnswer, options = [];
+
+            // Generate 10 random questions from different topics
+            if (currentQuestion < 10) {
+                const randomTopic = allQuestionsData[Math.floor(Math.random() * allQuestionsData.length)];
+                const category = randomTopic.category;
+
+                if (randomTopic.type === 'letter') {
+                    const letters = Object.keys(randomTopic.data);
+                    correctAnswer = letters[Math.floor(Math.random() * letters.length)];
+                    question = `What letter is this: ${randomTopic.data[correctAnswer]}`;
+                    options = letters.sort(() => Math.random() - 0.5).slice(0, 4);
+                } else if (randomTopic.type === 'number') {
+                    const nums = Object.keys(randomTopic.data).map(Number);
+                    correctAnswer = nums[Math.floor(Math.random() * nums.length)];
+                    question = randomTopic.data[correctAnswer];
+                    options = nums.sort(() => Math.random() - 0.5).slice(0, 4);
+                } else if (randomTopic.type === 'color') {
+                    const colorKeys = Object.keys(randomTopic.data);
+                    correctAnswer = colorKeys[Math.floor(Math.random() * colorKeys.length)];
+                    question = randomTopic.data[correctAnswer];
+                    options = colorKeys.sort(() => Math.random() - 0.5).slice(0, 4);
+                    if (!options.includes(correctAnswer)) {
+                        options[0] = correctAnswer;
+                    }
+                } else if (randomTopic.type === 'shape') {
+                    correctAnswer = randomTopic.names[Math.floor(Math.random() * randomTopic.names.length)];
+                    const shapeEmojis = { Circle: '⭕', Square: '⬜', Triangle: '🔺', Star: '⭐', Heart: '❤️', Diamond: '💎', Pentagon: '⬟', Hexagon: '🔶' };
+                    question = `What shape is this: ${shapeEmojis[correctAnswer]}`;
+                    options = randomTopic.names.sort(() => Math.random() - 0.5).slice(0, 4);
+                    if (!options.includes(correctAnswer)) {
+                        options[0] = correctAnswer;
+                    }
+                } else if (randomTopic.type === 'object') {
+                    const objKeys = Object.keys(randomTopic.emojis);
+                    const emoji = objKeys[Math.floor(Math.random() * objKeys.length)];
+                    correctAnswer = randomTopic.emojis[emoji];
+                    question = emoji;
+                    options = objKeys.map(k => randomTopic.emojis[k]).sort(() => Math.random() - 0.5).slice(0, 4);
+                    if (!options.includes(correctAnswer)) {
+                        options[0] = correctAnswer;
+                    }
+                } else if (randomTopic.type === 'animal') {
+                    correctAnswer = randomTopic.names[Math.floor(Math.random() * randomTopic.names.length)];
+                    const animalEmojis = { Lion: '🦁', Elephant: '🐘', Monkey: '🐵', Giraffe: '🦒', Tiger: '🐯', Bear: '🐻', Penguin: '🐧', Dolphin: '🐬', Butterfly: '🦋', Rabbit: '🐰' };
+                    question = animalEmojis[correctAnswer];
+                    options = randomTopic.names.sort(() => Math.random() - 0.5).slice(0, 4);
+                    if (!options.includes(correctAnswer)) {
+                        options[0] = correctAnswer;
+                    }
+                } else if (randomTopic.type === 'vehicle') {
+                    const vehicleKeys = Object.keys(randomTopic.emojis);
+                    const emoji = vehicleKeys[Math.floor(Math.random() * vehicleKeys.length)];
+                    correctAnswer = randomTopic.emojis[emoji];
+                    question = emoji;
+                    options = vehicleKeys.map(k => randomTopic.emojis[k]).sort(() => Math.random() - 0.5).slice(0, 4);
+                    if (!options.includes(correctAnswer)) {
+                        options[0] = correctAnswer;
+                    }
+                } else if (randomTopic.type === 'career') {
+                    correctAnswer = randomTopic.names[Math.floor(Math.random() * randomTopic.names.length)];
+                    const careerEmojis = { Doctor: '👨‍⚕️', Teacher: '👨‍🏫', Chef: '👨‍🍳', 'Police Officer': '👮', Firefighter: '👨‍🚒', Engineer: '👨‍🔧', Artist: '🎨', Musician: '🎵', Farmer: '👨‍🌾', Astronaut: '👨‍🚀' };
+                    question = careerEmojis[correctAnswer];
+                    options = randomTopic.names.sort(() => Math.random() - 0.5).slice(0, 4);
+                    if (!options.includes(correctAnswer)) {
+                        options[0] = correctAnswer;
+                    }
+                }
+
+                return { question, correctAnswer, options, category: randomTopic.category };
+            }
+
+            return null;
+        }
+
+        function startQuiz() {
+            const qData = getRandomQuestion();
+            if (!qData) {
+                showCompletion();
+                return;
+            }
+
+            document.getElementById('category-badge').textContent = qData.category;
+            document.getElementById('quiz-word').textContent = qData.question;
+            document.getElementById('quiz-feedback').textContent = '';
+
+            const quizOptions = document.getElementById('quiz-options');
+            quizOptions.innerHTML = '';
+
+            qData.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-option';
+                btn.textContent = opt;
+                btn.onclick = () => checkAnswer(opt, qData.correctAnswer, btn);
+                quizOptions.appendChild(btn);
+            });
+
+            updateProgress();
+            setTimeout(() => playQuizWord(), 500);
+        }
+
+        function playQuizWord() {
+            const question = document.getElementById('quiz-word').textContent;
+            if (question && question !== 'Tap to hear the question') {
+                speak(question);
+            }
+        }
+
+        function checkAnswer(selected, correct, btn) {
+            const allButtons = document.querySelectorAll('.quiz-option');
+            allButtons.forEach(b => b.disabled = true);
+
+            if (selected === correct) {
+                btn.classList.add('correct');
+                document.getElementById('quiz-feedback').textContent = '✅ Correct!';
+                document.getElementById('quiz-feedback').style.color = '#4CAF50';
+                score++;
+                playSound(1000, 200);
+                playSound(1200, 150);
+                currentQuestion++;
+                updateProgress();
+                setTimeout(() => startQuiz(), 1500);
+            } else {
+                btn.classList.add('incorrect');
+                document.getElementById('quiz-feedback').textContent = `❌ Not quite! It's ${correct}`;
+                document.getElementById('quiz-feedback').style.color = '#FF6B6B';
+                playSound(400, 200);
+                currentQuestion++;
+                updateProgress();
+                setTimeout(() => startQuiz(), 2000);
+            }
+        }
+
+        function updateProgress() {
+            const progress = (currentQuestion / 10) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('learned-count').textContent = `Score: ${score} / 10`;
+        }
+
+        function showCompletion() {
+            document.getElementById('quiz-mode').style.display = 'none';
+            document.getElementById('completion-message').style.display = 'block';
+            playSound(1000, 200);
+            playSound(1200, 200);
+            playSound(1400, 200);
+
+            for (let i = 0; i < 12; i++) {
+                setTimeout(() => createCelebration(), i * 80);
+            }
+        }
+
+        function createCelebration() {
+            const emojis = ['🎉', '⭐', '🌟', '✨', '🎊', '🏆'];
+            const celebration = document.createElement('div');
+            celebration.className = 'celebration';
+            celebration.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            celebration.style.left = (Math.random() * 80 + 10) + '%';
+            document.body.appendChild(celebration);
+
+            setTimeout(() => celebration.remove(), 2000);
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            const btn = document.querySelector('.controls button:first-child');
+            btn.textContent = soundEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            askedQuestions.clear();
+            document.getElementById('completion-message').style.display = 'none';
+            document.getElementById('quiz-mode').style.display = 'block';
+            startQuiz();
+        }
+
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize
+        startQuiz();
+    </script>
+</body>
+</html>
