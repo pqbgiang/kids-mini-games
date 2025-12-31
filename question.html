@@ -153,7 +153,10 @@
                 } else if (randomTopic.type === 'number') {
                     const nums = Object.keys(randomTopic.data).map(Number);
                     correctAnswer = nums[Math.floor(Math.random() * nums.length)];
+                    const numberWords = { 0: 'Zero', 1: 'One', 2: 'Two', 3: 'Three', 4: 'Four', 5: 'Five', 6: 'Six', 7: 'Seven', 8: 'Eight', 9: 'Nine' };
                     question = randomTopic.data[correctAnswer];
+                    // Store the word for speaking
+                    question = { emoji: randomTopic.data[correctAnswer], word: numberWords[correctAnswer] };
                     options = nums.sort(() => Math.random() - 0.5).slice(0, 4);
                 } else if (randomTopic.type === 'color') {
                     const colorKeys = Object.keys(randomTopic.data);
@@ -220,8 +223,21 @@
                 return;
             }
 
+            // Ensure quiz-mode is visible
+            document.getElementById('quiz-mode').style.display = 'block';
+            document.getElementById('completion-message').style.display = 'none';
+
             document.getElementById('category-badge').textContent = qData.category;
-            document.getElementById('quiz-word').textContent = qData.question;
+            
+            // Handle number questions with special display
+            if (typeof qData.question === 'object' && qData.question.emoji) {
+                document.getElementById('quiz-word').textContent = qData.question.emoji;
+                window.currentQuestionWord = qData.question.word;
+            } else {
+                document.getElementById('quiz-word').textContent = qData.question;
+                window.currentQuestionWord = qData.question;
+            }
+            
             document.getElementById('quiz-feedback').textContent = '';
 
             const quizOptions = document.getElementById('quiz-options');
@@ -240,9 +256,9 @@
         }
 
         function playQuizWord() {
-            const question = document.getElementById('quiz-word').textContent;
-            if (question && question !== 'Tap to hear the question') {
-                speak(question);
+            const word = window.currentQuestionWord || document.getElementById('quiz-word').textContent;
+            if (word && word !== 'Tap to hear the question') {
+                speak(word);
             }
         }
 
@@ -319,8 +335,10 @@
             window.location.href = 'index.html';
         }
 
-        // Initialize
-        startQuiz();
+        // Initialize with a small delay to ensure DOM is ready
+        setTimeout(() => {
+            startQuiz();
+        }, 100);
     </script>
 </body>
 </html>
