@@ -150,10 +150,9 @@
             display.style.transform = "scale(1.2)";
             setTimeout(() => display.style.transform = "scale(1)", 100);
             
-            // Speak the number and word
+            // Speak only the word (not the number)
             setTimeout(() => {
-                speak(number.toString());
-                setTimeout(() => speak(data.word), 300);
+                speak(data.word);
             }, 100);
             
             // Play a satisfying beep
@@ -255,13 +254,14 @@
             document.getElementById('quiz-word').style.fontSize = '40px';
             document.getElementById('quiz-feedback').innerText = '';
             
-            // Get 3 wrong options
+            // Get 3 wrong options - ensure no duplicates
+            let availableNumbers = numbers.filter(num => num !== correctNumber);
             let options = [correctNumber];
-            while (options.length < 4) {
-                const randomNumber = numbers[Math.floor(Math.random() * numbers.length)];
-                if (!options.includes(randomNumber)) {
-                    options.push(randomNumber);
-                }
+            
+            for (let i = 0; i < 3 && availableNumbers.length > 0; i++) {
+                const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+                options.push(availableNumbers[randomIndex]);
+                availableNumbers.splice(randomIndex, 1);
             }
             
             // Shuffle options
