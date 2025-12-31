@@ -421,6 +421,10 @@ button.active {
     text-align: center;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     z-index: 1000;
+    max-width: 90%;
+    min-width: 280px;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 #completion-message h2 {
@@ -432,6 +436,41 @@ button.active {
 #completion-message p {
     font-size: 24px;
     margin: 10px 0;
+}
+
+@media (max-width: 768px) {
+    #completion-message {
+        padding: 30px 20px;
+        border-radius: 20px;
+    }
+
+    #completion-message h2 {
+        font-size: 28px;
+        margin: 0 0 15px 0;
+    }
+
+    #completion-message p {
+        font-size: 18px;
+        margin: 8px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    #completion-message {
+        padding: 20px 15px;
+        border-radius: 15px;
+        max-width: 95%;
+    }
+
+    #completion-message h2 {
+        font-size: 24px;
+        margin: 0 0 12px 0;
+    }
+
+    #completion-message p {
+        font-size: 16px;
+        margin: 6px 0;
+    }
 }
 
 .coming-soon {

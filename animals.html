@@ -6,191 +6,90 @@
     <title>Animal Safari - Kids Learning Game</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        :root {
-            --primary-color: #FF6B9D;
-            --secondary-color: #FFA502;
-            --accent-color: #26A69A;
-        }
-
+        /* Animal Safari game specific styles */
         body {
-            background: linear-gradient(135deg, #FFE4E1 0%, #E0F7FA 100%);
-        }
-
-        #game-title {
-            color: #26A69A;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-
-        #animal-display {
-            width: 200px;
-            height: 200px;
-            font-size: 120px;
+            margin: 0;
             display: flex;
+            justify-content: center;
             align-items: center;
-            justify-content: center;
-            margin: 30px auto;
-            background: linear-gradient(135deg, #FFF9E6 0%, #FFE4E1 100%);
-            border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(38, 166, 154, 0.2);
-            animation: bounce 0.6s ease;
-        }
-
-        .animal-info {
-            font-size: 1.8em;
-            color: #26A69A;
-            font-weight: bold;
-            margin: 20px 0;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        .quiz-button {
-            background: linear-gradient(135deg, #FF6B9D 0%, #FFA502 100%);
-            color: white;
-            border: none;
-            padding: 20px;
-            margin: 10px;
-            width: 140px;
-            height: 140px;
-            font-size: 80px;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(255, 107, 157, 0.3);
-            display: inline-block;
-        }
-
-        .quiz-button:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(255, 107, 157, 0.5);
-        }
-
-        .quiz-button.correct {
-            animation: pulse 0.6s ease;
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-        }
-
-        .quiz-button.incorrect {
-            animation: shake 0.5s ease;
-            background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%);
-        }
-
-        .mode-toggle {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin: 20px 0;
-        }
-
-        .mode-btn {
-            padding: 12px 24px;
-            font-size: 1.1em;
-            background: #FFA502;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .mode-btn.active {
-            background: #26A69A;
-            transform: scale(1.05);
-        }
-
-        .progress-bar {
-            width: 300px;
-            height: 30px;
-            background: #E0E0E0;
-            border-radius: 15px;
-            margin: 20px auto;
+            height: 100vh;
+            background-color: #FFE4E1;
+            background-image: linear-gradient(135deg, #FFE4E1 0%, #E0F7FA 100%);
+            font-family: 'Arial Rounded MT Bold', 'Helvetica', sans-serif;
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            touch-action: manipulation;
         }
 
-        #progressFill {
-            height: 100%;
-            background: linear-gradient(90deg, #FF6B9D 0%, #FFA502 100%);
-            width: 0%;
-            transition: width 0.3s ease;
+        #game-card {
+            box-shadow: 0 20px 0 #6dbcc3;
         }
 
-        .progress-text {
-            text-align: center;
+        #game-card:active {
+            box-shadow: 0 10px 0 #6dbcc3;
+        }
+
+        #progress-fill {
+            background: linear-gradient(90deg, #FF6B9D, #26A69A);
+        }
+
+        #completion-message h2 {
             color: #26A69A;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        .completion-message {
-            font-size: 1.5em;
-            color: #26A69A;
-            text-align: center;
-            margin: 20px;
-            animation: float-up 0.8s ease;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <button class="back-btn" onclick="goBack()">🏠</button>        
-        <div class="mode-toggle">
-            <button class="mode-btn active" onclick="switchMode('learn')">Learn Mode</button>
-            <button class="mode-btn" onclick="switchMode('quiz')">Quiz Mode</button>
-            <button class="audio-toggle" onclick="toggleAudio()">🔊 Sound ON</button>
-        </div>
+    <div class="overlay" id="overlay"></div>
 
-        <div class="progress-bar">
-            <div id="progressFill"></div>
-        </div>
-        <div class="progress-text">Learned: <span id="progress">0</span> / 10</div>
+    <button class="back-btn" onclick="goBack()">🏠</button>
 
-        <!-- Learn Mode -->
-        <div id="learn-mode" style="display: block;">
-            <div id="animal-display"></div>
-            <div class="animal-info">
-                <div id="animal-name"></div>
-                <div id="animal-description" style="font-size: 0.8em; color: #999; margin-top: 10px;"></div>
+    <div class="controls">
+        <button id="learn-btn" class="active" onclick="switchMode('learn')">Learn Mode</button>
+        <button id="quiz-btn" onclick="switchMode('quiz')">Quiz Mode</button>
+        <button onclick="toggleAudio()">🔊 Sound: ON</button>
+    </div>
+
+    <div id="learn-mode">
+        <div id="game-card" onclick="nextItem()">
+            <h1 id="display-text">🦁</h1>
+            <div id="emoji-display">🦁</div>
+            <div id="word-display">Lion</div>
+            <p class="instruction">Tap to learn the next animal!</p>
+            <div id="progress-bar">
+                <div id="progress-fill" style="width: 10%"></div>
             </div>
-            <div style="text-align: center;">
-                <button class="action-btn" onclick="speakCurrent()">🔊 Hear it!</button>
-                <button class="action-btn" onclick="nextItem()">Next →</button>
-            </div>
+            <div id="learned-count">Learned: 1 / 10</div>
         </div>
+    </div>
 
-        <!-- Quiz Mode -->
-        <div id="quiz-mode" style="display: none;">
-            <h2 style="text-align: center; color: #26A69A;">Listen and pick the right animal!</h2>
+    <div id="quiz-mode" style="display: none;">
+        <div id="game-card">
+            <p class="instruction" style="font-size: 16px; margin-bottom: 10px;">Listen and pick the right animal!</p>
+            <h1 id="quiz-word" style="font-size: 48px; color: #26A69A; margin: 20px 0;">Tap to hear the animal</h1>
             <div style="text-align: center; margin: 20px 0;">
-                <button class="action-btn" onclick="playQuizAudio()">🔊 Play Sound</button>
+                <button style="padding: 12px 20px; font-size: 16px; cursor: pointer;" onclick="playQuizWord()">🔊 Play Animal Sound</button>
             </div>
-            <div id="quiz-instructions" style="text-align: center; color: #FFA502; font-weight: bold; margin: 10px;">
-                Pick the animal you hear!
-            </div>
-            <div id="quiz-options" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;"></div>
-            <div id="feedback" style="text-align: center; font-size: 1.2em; margin-top: 20px; min-height: 30px;"></div>
+            <div class="quiz-options" id="quiz-options"></div>
+            <div id="quiz-feedback" style="font-size: 20px; margin-top: 15px; min-height: 30px;"></div>
         </div>
+    </div>
 
-        <!-- Completion Message -->
-        <div id="completion-message" style="display: none; text-align: center;">
-            <div class="completion-message">🎉 Awesome! You learned all animals! 🎉</div>
-            <div style="font-size: 3em; text-align: center; letter-spacing: 5px;">🦁🐘🐵🦒🐯🐻🐧🐬🦋🐰</div>
-        </div>
+    <div id="completion-message" style="display: none; text-align: center;">
+        <h2 style="font-size: 2em;">🎉 Awesome! You learned all animals! 🎉</h2>
+        <div style="font-size: 3em; letter-spacing: 5px; margin-top: 20px;">🦁🐘🐵🦒🐯🐻🐧🐬🦋🐰</div>
     </div>
 
     <script>
         const animalsData = {
-            Lion: { description: 'King of the jungle with a big mane', emoji: '🦁' },
-            Elephant: { description: 'Huge animal with a long trunk', emoji: '🐘' },
-            Monkey: { description: 'Playful animal that loves bananas', emoji: '🐵' },
-            Giraffe: { description: 'Tallest animal with a long neck', emoji: '🦒' },
-            Tiger: { description: 'Orange striped big cat', emoji: '🐯' },
-            Bear: { description: 'Big and strong furry animal', emoji: '🐻' },
-            Penguin: { description: 'Black and white bird that lives in ice', emoji: '🐧' },
-            Dolphin: { description: 'Smart marine animal that jumps high', emoji: '🐬' },
-            Butterfly: { description: 'Colorful insect with beautiful wings', emoji: '🦋' },
-            Rabbit: { description: 'Cute hopping animal with long ears', emoji: '🐰' }
+            Lion: { word: 'Lion', emoji: '🦁' },
+            Elephant: { word: 'Elephant', emoji: '🐘' },
+            Monkey: { word: 'Monkey', emoji: '🐵' },
+            Giraffe: { word: 'Giraffe', emoji: '🦒' },
+            Tiger: { word: 'Tiger', emoji: '🐯' },
+            Bear: { word: 'Bear', emoji: '🐻' },
+            Penguin: { word: 'Penguin', emoji: '🐧' },
+            Dolphin: { word: 'Dolphin', emoji: '🐬' },
+            Butterfly: { word: 'Butterfly', emoji: '🦋' },
+            Rabbit: { word: 'Rabbit', emoji: '🐰' }
         };
 
         let currentIndex = 0;
@@ -223,24 +122,12 @@
             oscillator.stop(audioContext.currentTime + duration / 1000);
         }
 
-        function speakCurrent() {
-            const animal = animals[currentIndex];
-            speak(animal);
-            playSound(700, 150);
-        }
-
-        function playQuizAudio() {
-            const animal = animals[currentIndex];
-            speak(animal);
-            playSound(800, 200);
-        }
-
         function updateDisplay() {
             const animal = animals[currentIndex];
             const data = animalsData[animal];
-            document.getElementById('animal-display').textContent = data.emoji;
-            document.getElementById('animal-name').textContent = animal;
-            document.getElementById('animal-description').textContent = data.description;
+            document.getElementById('display-text').textContent = animal;
+            document.getElementById('emoji-display').textContent = data.emoji;
+            document.getElementById('word-display').textContent = data.word;
             updateProgress();
 
             if (currentMode === 'learn') {
@@ -251,8 +138,8 @@
 
         function updateProgress() {
             const percent = ((currentIndex + 1) / animals.length) * 100;
-            document.getElementById('progressFill').style.width = percent + '%';
-            document.getElementById('progress').textContent = Math.min(currentIndex + 1, learnedCount + 1);
+            document.getElementById('progress-fill').style.width = percent + '%';
+            document.getElementById('learned-count').textContent = 'Learned: ' + Math.min(currentIndex + 1, learnedCount + 1) + ' / 10';
         }
 
         function nextItem() {
@@ -272,16 +159,18 @@
 
         function switchMode(mode) {
             currentMode = mode;
-            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-
+            document.getElementById('learn-btn').classList.remove('active');
+            document.getElementById('quiz-btn').classList.remove('active');
+            
             if (mode === 'learn') {
+                document.getElementById('learn-btn').classList.add('active');
                 document.getElementById('learn-mode').style.display = 'block';
                 document.getElementById('quiz-mode').style.display = 'none';
                 document.getElementById('completion-message').style.display = 'none';
                 currentIndex = 0;
                 updateDisplay();
             } else {
+                document.getElementById('quiz-btn').classList.add('active');
                 document.getElementById('learn-mode').style.display = 'none';
                 document.getElementById('quiz-mode').style.display = 'block';
                 document.getElementById('completion-message').style.display = 'none';
@@ -295,8 +184,8 @@
             const animal = animals[currentIndex];
             const data = animalsData[animal];
 
-            document.getElementById('quiz-instructions').textContent = `Pick the animal you hear!`;
-            document.getElementById('feedback').textContent = '';
+            document.getElementById('quiz-word').textContent = 'Tap to hear the animal';
+            document.getElementById('quiz-feedback').textContent = '';
 
             let options = [animal];
             while (options.length < 4) {
@@ -311,13 +200,19 @@
             quizOptions.innerHTML = '';
             options.forEach(opt => {
                 const btn = document.createElement('button');
-                btn.className = 'quiz-button';
+                btn.className = 'quiz-option';
                 btn.textContent = animalsData[opt].emoji;
                 btn.onclick = () => checkAnswer(opt, animal, btn);
                 quizOptions.appendChild(btn);
             });
 
-            setTimeout(() => playQuizAudio(), 500);
+            setTimeout(() => playQuizWord(), 500);
+        }
+
+        function playQuizWord() {
+            const animal = animals[currentIndex];
+            speak(animal);
+            playSound(800, 200);
         }
 
         function checkAnswer(selected, correct, btn) {
@@ -326,16 +221,16 @@
 
             if (selected === correct) {
                 btn.classList.add('correct');
-                document.getElementById('feedback').textContent = '✅ Correct! Well done!';
-                document.getElementById('feedback').style.color = '#4CAF50';
+                document.getElementById('quiz-feedback').textContent = '✅ Correct! Well done!';
+                document.getElementById('quiz-feedback').style.color = '#4CAF50';
                 playSound(1000, 200);
                 playSound(1200, 150);
                 learnedCount = Math.max(learnedCount, currentIndex + 1);
                 setTimeout(() => startQuiz(), 1500);
             } else {
                 btn.classList.add('incorrect');
-                document.getElementById('feedback').textContent = `❌ Not quite. It's a ${correct}!`;
-                document.getElementById('feedback').style.color = '#FF6B6B';
+                document.getElementById('quiz-feedback').textContent = `❌ Not quite. It's a ${correct}!`;
+                document.getElementById('quiz-feedback').style.color = '#FF6B6B';
                 playSound(400, 200);
                 setTimeout(() => startQuiz(), 2000);
             }
@@ -343,8 +238,8 @@
 
         function toggleAudio() {
             soundEnabled = !soundEnabled;
-            const btn = document.querySelector('.audio-toggle');
-            btn.textContent = soundEnabled ? '🔊 Sound ON' : '🔇 Sound OFF';
+            const btn = document.querySelector('.controls button:last-child');
+            btn.textContent = soundEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
         }
 
         function goBack() {
