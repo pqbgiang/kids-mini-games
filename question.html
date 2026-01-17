@@ -51,24 +51,138 @@
         #quiz-word {
             color: #667eea;
         }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+            padding: 0 20px;
+        }
+
+        .quiz-option {
+            color: white;
+            border: none;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-wrap: break-word;
+        }
+
+        .quiz-option:nth-child(1) {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 8px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .quiz-option:nth-child(1):hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .quiz-option:nth-child(2) {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 8px 15px rgba(245, 87, 108, 0.3);
+        }
+
+        .quiz-option:nth-child(2):hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(245, 87, 108, 0.5);
+        }
+
+        .quiz-option:nth-child(3) {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            box-shadow: 0 8px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .quiz-option:nth-child(3):hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(79, 172, 254, 0.5);
+        }
+
+        .quiz-option:nth-child(4) {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            box-shadow: 0 8px 15px rgba(250, 112, 154, 0.3);
+        }
+
+        .quiz-option:nth-child(4):hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(250, 112, 154, 0.5);
+        }
+
+        .quiz-option:active {
+            transform: translateY(-2px);
+        }
+
+        .quiz-option.correct {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            animation: pulse 0.6s ease;
+        }
+
+        .quiz-option.incorrect {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%);
+            animation: shake 0.5s ease;
+        }
+
+        .quiz-option:disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .quiz-options {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                padding: 0 15px;
+            }
+
+            .quiz-option {
+                padding: 18px;
+                font-size: 20px;
+                min-height: 70px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .quiz-options {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                padding: 0 10px;
+            }
+
+            .quiz-option {
+                padding: 16px;
+                font-size: 18px;
+                min-height: 60px;
+            }
+
+            #quiz-word {
+                font-size: 36px !important;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div class="overlay" id="overlay"></div>
 
-    <button class="back-btn" onclick="goBack()">🏠</button>
-
     <div class="controls">
-        <button onclick="toggleAudio()">🔊 Sound: ON</button>
-        <button onclick="restartQuiz()" style="padding: 12px 20px; background: #764ba2; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">Restart</button>
+        <button class="back-btn" onclick="goBack()" data-tooltip="Home">🏠</button>
+        <button onclick="toggleAudio()" data-tooltip="Toggle Sound">🔊</button>
+        <button onclick="restartQuiz()" data-tooltip="Restart Quiz">🔄</button>
     </div>
 
     <div id="quiz-mode">
         <div id="game-card">
             <p class="instruction" style="font-size: 14px; margin-bottom: 5px;">Super Quiz Challenge!</p>
             <div class="category-badge" id="category-badge">📚 All Topics</div>
-            <h1 id="quiz-word" style="font-size: 48px; margin: 20px 0;">Tap to hear the question</h1>
+            <h1 id="quiz-word" style="font-size: 64px; margin: 30px 0; line-height: 1.2; font-weight: bold; color: #667eea;">Tap to hear the question</h1>
             <div style="text-align: center; margin: 20px 0;">
                 <button style="padding: 12px 20px; font-size: 16px; cursor: pointer;" onclick="playQuizWord()">🔊 Play Question</button>
             </div>
@@ -318,8 +432,8 @@
 
         function toggleAudio() {
             soundEnabled = !soundEnabled;
-            const btn = document.querySelector('.controls button:first-child');
-            btn.textContent = soundEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+            const btn = document.querySelector('.controls button:nth-child(2)');
+            btn.textContent = soundEnabled ? '🔊' : '🔇';
         }
 
         function restartQuiz() {

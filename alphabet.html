@@ -41,12 +41,11 @@
 
     <div class="overlay" id="overlay"></div>
 
-    <button class="back-btn" onclick="goBack()">🏠</button>
-
     <div class="controls">
-        <button id="learn-btn" class="active" onclick="switchMode('learn')">Learn Mode</button>
-        <button id="quiz-btn" onclick="switchMode('quiz')">Quiz Mode</button>
-        <button onclick="toggleAudio()">🔊 Sound: ON</button>
+        <button class="back-btn" onclick="goBack()" data-tooltip="Home">🏠</button>
+        <button id="learn-btn" class="active" onclick="switchMode('learn')" data-tooltip="Learn Mode">📚</button>
+        <button id="quiz-btn" onclick="switchMode('quiz')" data-tooltip="Quiz Mode">❓</button>
+        <button onclick="toggleAudio()" data-tooltip="Toggle Sound">🔊</button>
     </div>
 
     <div id="learn-mode">
@@ -191,8 +190,7 @@
 
         function toggleAudio() {
             soundEnabled = !soundEnabled;
-            event.target.innerText = soundEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
-        }
+         }
 
         function showCompletion() {
             const overlay = document.getElementById('overlay');
